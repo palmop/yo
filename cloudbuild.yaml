@@ -1,0 +1,69 @@
+steps:
+# This step runs the pnpm installation
+- name: 'node:lts'
+  id: pnpm install
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm --global turbo && pnpm install --no-frozen-lockfile'
+
+# This step runs the pnpm build phase
+- name: 'node:lts'
+  id: pnmp build
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm --global turbo && turbo run build'
+
+  # This step copy the next versioned content to the GCS bucket dedicated for static assets
+- name: gcr.io/cloud-builders/gsutil
+  id: copy to bucket
+  args:
+    - '-m'
+    - cp
+    - '-r'
+    - './apps/web/.next/'
+    - 'gs://${_BUCKET_NAME}'
+
+# This step builds the container image.
+- name: 'gcr.io/cloud-builders/docker'
+  id: Docker Build
+  args:
+  - 'build'
+  - '-t'
+  - 'europe-west8-docker.pkg.dev/$PROJECT_ID/${_PROJECT_ARTIFACT}/don-king-preprod:${COMMIT_SHA}'
+  - '.'
+  - '-f'
+  #- 'Dockerfile'
+  - './apps/web/Dockerfile'
+
+
+
+# This step pushes the image to Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  id: Docker Push
+  args:
+  - 'push'
+  - 'europe-west8-docker.pkg.dev/$PROJECT_ID/${_PROJECT_ARTIFACT}/don-king-preprod:${COMMIT_SHA}'
+
+# This step starts the Delivery pipeline for CD (NOTE THAT THE CLOUD DEPLOY PIPELINE MUST EXISTS)
+- name: 'gcr.io/cloud-builders/gcloud'
+  entrypoint: 'bash'
+  args:
+  - '-c'
+  - > 
+    gcloud deploy releases create release-dk-$SHORT_SHA-${_RELEASE_TYPE}
+    --delivery-pipeline=${_DELIVERY_PIPELINE}
+    --region=${_PIPELINE_REGION}
+    --source=${_K8S_PATH}
+    --gcs-source-staging-dir=${_ARTIFACT_STORAGE}
+    --images=don-king-preprod=europe-west8-docker.pkg.dev/$PROJECT_ID/${_PROJECT_ARTIFACT}/don-king-preprod:${COMMIT_SHA}
+
+timeout: 1200s
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+
+
+

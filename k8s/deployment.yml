@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: don-king-preprod
+  namespace: frontend
+  labels:
+    app: don-king-preprod
+spec:
+  selector:
+    matchLabels:
+      app: don-king-preprod
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: don-king-preprod
+    spec:
+      containers:
+      - name: don-king-preprod
+        image: don-king-preprod
+        imagePullPolicy: Always
+        env:
+           - name: NODE_ENV
+             value: production
+        livenessProbe:
+          httpGet:
+            path: /?healthcheck=1
+            port: 3000
+          periodSeconds: 20  # how often kubelet performs the check
+          successThreshold: 1
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /?healthcheck=1
+            port: 3000
+          initialDelaySeconds: 10  # how much wait before performing the first check
+          periodSeconds: 20  # how often kubelet performs the check
+          successThreshold: 1
+          failureThreshold: 5
+        resources:
+          requests: # machine-type : almeno un singolo nodo che possa rispettare questi valori
+            memory: "400Mi"
+            cpu: "250m"
+          limits: # max(pod) * mem < machine-type * max(nodi)
+            memory: "600Mi"
+            cpu: "400m"
+        ports:
+        - containerPort: 3000

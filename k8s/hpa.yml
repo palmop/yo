@@ -1,0 +1,22 @@
+# horizontal pod autoscaling (hpa)
+# def a livello k8s, agnostico dalle risorse dei nodi.
+apiVersion: autoscaling/v2
+kind: "HorizontalPodAutoscaler"
+metadata:
+  name: don-king-preprod-hpa
+  namespace: frontend
+spec:
+  scaleTargetRef:
+    kind: "Deployment"
+    name: don-king-preprod # da kubectl get deployment``
+    apiVersion: apps/v1 # da deployment.yml vedi le apiVersion
+  minReplicas: 1 
+  maxReplicas: 1
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60 # calcola la media in pochi sec, e se supera => scala
+
