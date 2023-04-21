@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: don-king-preprod
+  name: don-king-test1
   namespace: frontend
   labels:
-    app: don-king-preprod
+    app: don-king-test1
 spec:
   selector:
     matchLabels:
-      app: don-king-preprod
+      app: don-king-test1
   replicas: 1
   template:
     metadata:
       labels:
-        app: don-king-preprod
+        app: don-king-test1
     spec:
       containers:
-      - name: don-king-preprod
-        image: don-king-preprod
+      - name: don-king-test1
+        image: don-king-test1
         imagePullPolicy: Always
         env:
            - name: NODE_ENV

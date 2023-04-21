@@ -1,7 +1,7 @@
 apiVersion: skaffold/v2beta16
 kind: Config
 metadata:
-  name: don-king-preprod
+  name: don-king-test1
 deploy:
   kubectl:
     manifests: ["deployment.yml", "service.yml", "hpa.yml"]

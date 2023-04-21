@@ -33,7 +33,7 @@ steps:
   args:
   - 'build'
   - '-t'
-  - 'europe-west8-docker.pkg.dev/$PROJECT_ID/${_PROJECT_ARTIFACT}/don-king-preprod:${COMMIT_SHA}'
+  - 'europe-west8-docker.pkg.dev/$PROJECT_ID/${_PROJECT_ARTIFACT}/don-king-test1:${COMMIT_SHA}'
   - '.'
   - '-f'
   #- 'Dockerfile'
@@ -46,7 +46,7 @@ steps:
   id: Docker Push
   args:
   - 'push'
-  - 'europe-west8-docker.pkg.dev/$PROJECT_ID/${_PROJECT_ARTIFACT}/don-king-preprod:${COMMIT_SHA}'
+  - 'europe-west8-docker.pkg.dev/$PROJECT_ID/${_PROJECT_ARTIFACT}/don-king-test1:${COMMIT_SHA}'
 
 # This step starts the Delivery pipeline for CD (NOTE THAT THE CLOUD DEPLOY PIPELINE MUST EXISTS)
 - name: 'gcr.io/cloud-builders/gcloud'
@@ -59,7 +59,7 @@ steps:
     --region=${_PIPELINE_REGION}
     --source=${_K8S_PATH}
     --gcs-source-staging-dir=${_ARTIFACT_STORAGE}
-    --images=don-king-preprod=europe-west8-docker.pkg.dev/$PROJECT_ID/${_PROJECT_ARTIFACT}/don-king-preprod:${COMMIT_SHA}
+    --images=don-king-test1=europe-west8-docker.pkg.dev/$PROJECT_ID/${_PROJECT_ARTIFACT}/don-king-test1:${COMMIT_SHA}
 
 timeout: 1200s
 
